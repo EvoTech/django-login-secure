@@ -1,0 +1,3 @@
+Account "{{ user.username }}" {{ user.email }} at http://{{ site }}/ was blocked by security system. 
+Activation code is {{ activation_code }}
+Activation link is http://{{ site }}{% url login_secure_unlock_user activation_code=activation_code %}
