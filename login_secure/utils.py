@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail, mail_admins
 from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
+from django.test import client
 
 from .models import LoginAttempt, BlockedUser
 
@@ -110,3 +111,4 @@ def patch_authenticate():
     if auth.authenticate is not authenticate_secure:
         authenticate_orig = auth.authenticate
         auth.authenticate = authenticate_secure
+        client.authenticate = authenticate_secure

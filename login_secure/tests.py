@@ -1,24 +1,63 @@
 from __future__ import absolute_import, unicode_literals
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
 
-Replace these with more appropriate tests for your application.
-"""
-
+from django.contrib.auth.models import User
+from django.core import mail, urlresolvers
 from django.test import TestCase
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.failUnlessEqual(1 + 1, 2)
+from . import utils
+from .models import LoginAttempt, BlockedUser
 
-__test__ = {"doctest": """
-Another way to test that 1 + 1 is equal to 2.
 
->>> 1 + 1 == 2
-True
-"""}
+class LoginSecureTest(TestCase):
 
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='test',
+            email="test@mailinator.com",
+            password="testpwd"
+        )
+
+    def test_login(self):
+        mail_count = len(mail.outbox)
+
+        for i in range(utils.LIMIT - 1):
+            response = self.client.login(
+                username='test',
+                password='not_testpwd'
+            )
+            self.assertFalse(response)
+            self.assertEqual(len(LoginAttempt.objects.all()), i + 1)
+            self.assertEqual(len(BlockedUser.objects.all()), 0)
+            self.assertEqual(len(mail.outbox), mail_count)
+
+        self.assertRaises(
+            utils.PermissionDenied,
+            self.client.login,
+            **dict(username='test', password='not_testpwd')
+        )
+        self.assertEqual(len(LoginAttempt.objects.all()), utils.LIMIT)
+        self.assertEqual(len(BlockedUser.objects.all()), 1)
+        self.assertEqual(len(mail.outbox), mail_count + 2)
+
+        blocked = BlockedUser.objects.all()[0]
+        self.assertEqual(blocked.user, self.user)
+        unlock_url = urlresolvers.reverse(
+            'login_secure_unlock_user',
+            kwargs={
+                'activation_code': blocked.key
+            }
+        )
+        self.assertTrue(unlock_url in mail.outbox[0].body)
+
+        self.assertRaises(
+            utils.PermissionDenied,
+            self.client.login,
+            **dict(username='test', password='testpwd')
+        )
+
+        response = self.client.get(unlock_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(BlockedUser.objects.all()), 0)
+
+        response = self.client.login(username='test', password='testpwd')
+        self.assertTrue(response)
