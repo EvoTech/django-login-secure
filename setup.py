@@ -18,7 +18,7 @@ setup(
     author = "Ivan Zakrevsky",
     author_email = "ivzak@yandex.ru",
     description = "Login secure.",
-    long_description=open(os.path.join(os.path.dirname(__file__), 'README')).read(),
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     license = "BSD License",
     keywords = "django",
     classifiers = [
