@@ -5,7 +5,7 @@
 ^\.\#
 ^\#
 ^etags$
-^.ropeproject/
+.ropeproject
 ^\.project$
 ^\.pydevproject$
 ^\.settings/
