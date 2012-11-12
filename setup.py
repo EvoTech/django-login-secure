@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 #!/usr/bin/env python
 #
 # Copyright (c) 2011 Ivan Zakrevsky
@@ -32,5 +33,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    url = "https://bitbucket.org/evotech/%s" % app_name,
+    url = "https://bitbucket.org/evotech/{0}".format(app_name),
 )

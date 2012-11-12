@@ -1,3 +1,4 @@
+from __future__ import absolute_import, unicode_literals
 import copy
 import datetime
 import uuid
@@ -12,6 +13,11 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.loader import render_to_string
 
 from .models import LoginAttempt, BlockedUser
+
+try:
+    str = unicode  # Python 2.* compatible
+except NameError:
+    pass
 
 authenticate_orig = None
 
@@ -50,7 +56,7 @@ def authenticate_secure(**credentials):
                 and failed_attempts.count() >= LIMIT:
             blocked = BlockedUser()
             blocked.user = logging_user
-            blocked.key = unicode(uuid.uuid4())
+            blocked.key = str(uuid.uuid4())
             blocked.save()
 
             user_is_blocked = True
